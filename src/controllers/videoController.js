@@ -30,3 +30,5 @@ export const postUpload = (req, res) => {
     return res.redirect("/");
 };
 
+
+console.log('Test')
