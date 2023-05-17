@@ -5,7 +5,13 @@ const volumeRange = document.getElementById("volume");
 const currentTime = document.getElementById("currentTime");
 const totalTime = document.getElementById("totalTime");
 const timeline = document.getElementById("timeline");
+const fullScreenBtn = document.getElementById("fullScreen");
+const videoContainer = document.getElementById("videoContainer");
+const videoControls = document.getElementById("videoControls");
 
+let controlsTimeout = null;
+let controlsMovementTimeout = null;
+//controlsTimeout과 controlsMovementTimeout: 컨트롤 숨김을 지연시키기 위해 사용되는 타임아웃을 저장하는 변수들입니다. 초기값은 null로 설정됩니다.
 let volumeValue = 0.5;
 video.volume = volumeValue;
 
@@ -60,9 +66,50 @@ const handleTimelineChange = (event) => {
     video.currentTime = value;
 }
 
+const handleFullscreen = () => {
+    const fullscreen = document.fullscreenElement;
+    if(fullscreen) {
+        document.exitFullscreen();
+        fullScreenBtn.innerText = "Enter Full Screen";
+    } else {
+        videoContainer.requestFullscreen();
+        fullScreenBtn.innerText = "Exit Full Screen";
+    }
+};
+
+const hideControls = () => videoControls.classList.remove("showing")
+
+const handleMouseMove = () => {
+    if(controlsTimeout) {
+        clearTimeout(controlsTimeout);
+        controlsTimeout = null;
+    }
+    if(controlsMovementTimeout) {
+        clearTimeout(controlsMovementTimeout);
+        controlsMovementTimeout = null;
+    }
+    videoControls.classList.add("showing");
+    controlsMovementTimeout = setTimeout(hideControls, 3000);
+};
+
+const handleMouseLeave = () => {
+    controlsTimeout = setTimeout(hideControls, 3000);
+};
+
+const handleEnded = () => {
+    const { id } = videoContainer.dataset;
+    fetch(`/api/videos/${id}/view`, {
+        method:"POST",
+    });
+};
+
 playBtn.addEventListener("click", handlePlayClick);
 muteBtn.addEventListener("click", handleMute);
 volumeRange.addEventListener("input", handleVolumeChange);
 video.addEventListener("loadedmetadata", handleLoadedMetadata);
 video.addEventListener("timeupdate", handleTimeUpdate);
+video.addEventListener("ended", handleEnded);
 timeline.addEventListener("input", handleTimelineChange);
+fullScreenBtn.addEventListener("click", handleFullscreen);
+video.addEventListener("mousemove", handleMouseMove);
+video.addEventListener("mouseleave", handleMouseLeave);
