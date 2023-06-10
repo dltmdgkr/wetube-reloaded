@@ -23,6 +23,7 @@ const addComment = (text, id) => {
 
 const handleSubmit = async (event) => {
   event.preventDefault(); // 새로고침 방지
+  console.log('브랜치 테스트')
   const textarea = form.querySelector("textarea");
   const text = textarea.value;
   const videoId = videoContainer.dataset.id;
